@@ -1,0 +1,60 @@
+"""
+This program reads the adsb table and sorts by TOMR, 
+The purpose is only to bin the messages into 1/2 second time periods
+"""
+
+#Get libraries
+from collections import Counter
+import sqlite3 as lite
+import pyModeS as pms
+import numpy as np
+import csv
+import pandas as pd
+
+#==================================================
+#MAIN
+#==================================================
+#Open database connection and output file
+con = lite.connect('adsb.db')
+cur = con.cursor()
+print("Successfully Connected to SQLite")
+
+#Open Cosines file
+f = open("bin_by_5.csv", 'w')
+
+outCols = ['ICAO', 'timePeriod']
+
+#clear out the exisiting data in times table
+q = "DELETE from times;"
+result = con.execute(q)
+
+#select the adsb message sin TOMR order
+q = "SELECT icao, msTime FROM adsb order by msTime;" 
+result = con.execute(q)
+rs = result.fetchall()
+print("Number of records", len(rs))
+
+strTime = 0.0
+curTime = 0.0
+timePeriod = 1
+
+for row in rs:
+  curTime = float(row[1])
+  if strTime == 0:
+     strTime = curTime
+  dif = curTime - strTime
+  if dif > 0.5:            #timeperiod now 1/2  secs
+     strTime = curTime
+     timePeriod = timePeriod + 1
+  gmrOut = str(row[0]) + "," + str(timePeriod) + "\n"
+  f.write(gmrOut)
+  f.flush()
+  qry = "INSERT INTO times VALUES ('"  
+  qry = qry + str(row[0]) + "', '"  + str(timePeriod) + "');"
+  count = cur.execute(qry)
+
+print("number of 1/2 second time periods", timePeriod)
+f.close()
+con.commit()
+con.close()
+
