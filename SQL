@@ -1,0 +1,16 @@
+#These programs work on the dataset available on mendeley: https://data.mendeley.com/drafts/j948jp2r5f
+#Step 1 is to run the Python code also on this page
+#Step 2	is a SQL aggregation
+CREATE TABLE countBy as 
+SELECT count(*) as Msg_Count, count(distinct ICAO) as Concurrent
+FROM times 
+GROUP BY timePeriod;
+#Step 3	is a SQL aggregation
+CREATE TABLE Rt as
+SELECT Concurrent, avg(Msg_Count) as Msg_Rate
+FROM countBy
+GROUP BY Concurrent;
+#Step 4	is a SQL aggregation
+CREATE TABLE Rp as
+SELECT Concurrent, Msg_Rate/Concurrent
+FROM Rt;
