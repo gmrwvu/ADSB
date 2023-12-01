@@ -1,6 +1,7 @@
 """
 This program reads the adsb table and sorts by TOMR, 
 The purpose is only to bin the messages into 1/2 second time periods
+It withs with the dataset available on mendeley: https://data.mendeley.com/drafts/j948jp2r5f
 """
 
 #Get libraries
